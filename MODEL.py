@@ -13,7 +13,7 @@ label_encoder = LabelEncoder()
 data['MenuCategory'] = label_encoder.fit_transform(data['MenuCategory'])
 data['MenuItem'] = label_encoder.fit_transform(data['MenuItem'])
 data['Ingredients'] = label_encoder.fit_transform(data['Ingredients'])
-data['Profitability'] = label_encoder.fit_transform(data['Profitability'])
+data['Profitability'] = label_encoder.fit_transform(data['Prosfitability'])
 
 # Define features and target
 X = data[['MenuCategory', 'MenuItem', 'Ingredients', 'Price']]
@@ -29,3 +29,7 @@ model.fit(X_train, y_train)
 # Save the model
 with open('random_forest_model.pkl', 'wb') as file:
     pickle.dump(model, file)
+
+# Save the label encoder
+with open('label_encoder.pkl', 'wb') as file:
+    pickle.dump(label_encoder, file)
