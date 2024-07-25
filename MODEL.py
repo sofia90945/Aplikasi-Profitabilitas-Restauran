@@ -6,14 +6,14 @@ from sklearn.preprocessing import LabelEncoder
 import pickle
 
 # Load data
-data = pd.read_csv('E:/SEMESTER 4/MPML/restaurant_menu_optimization_data.csv')
+data = pd.read_csv('path_to_your_dataset.csv')
 
 # Encode categorical variables
 label_encoder = LabelEncoder()
 data['MenuCategory'] = label_encoder.fit_transform(data['MenuCategory'])
 data['MenuItem'] = label_encoder.fit_transform(data['MenuItem'])
 data['Ingredients'] = label_encoder.fit_transform(data['Ingredients'])
-data['Profitability'] = label_encoder.fit_transform(data['Prosfitability'])
+data['Profitability'] = label_encoder.fit_transform(data['Profitability'])
 
 # Define features and target
 X = data[['MenuCategory', 'MenuItem', 'Ingredients', 'Price']]
@@ -29,7 +29,3 @@ model.fit(X_train, y_train)
 # Save the model
 with open('random_forest_model.pkl', 'wb') as file:
     pickle.dump(model, file)
-
-# Save the label encoder
-with open('label_encoder.pkl', 'wb') as file:
-    pickle.dump(label_encoder, file)

@@ -4,34 +4,29 @@ import numpy as np
 import pickle
 from sklearn.preprocessing import LabelEncoder
 
-# Load model and label encoder
+# Load model
 def load_model():
     with open('random_forest_model.pkl', 'rb') as file:
         model = pickle.load(file)
     return model
 
-def load_label_encoder():
-    with open('label_encoder.pkl', 'rb') as file:
-        label_encoder = pickle.load(file)
-    return label_encoder
-
 model = load_model()
-label_encoder = load_label_encoder()
 
 # Title
 st.title("Aplikasi Prediksi Profitabilitas Restoran")
 
 # Input form
 st.header("Input Data")
-menu_category = st.selectbox("Menu Category", label_encoder.classes_)
+menu_category = st.selectbox("Menu Category", ["Beverages", "Appetizers", "Desserts", "Main Course"])
 menu_item = st.text_input("Menu Item")
 ingredients = st.text_input("Ingredients")
 price = st.number_input("Price", min_value=0.0, value=10.0)
 
 # Preprocessing input
-encoded_menu_category = label_encoder.transform([menu_category])[0]
-encoded_menu_item = label_encoder.transform([menu_item])[0]
-encoded_ingredients = label_encoder.transform([ingredients])[0]
+label_encoder = LabelEncoder()
+encoded_menu_category = label_encoder.fit_transform([menu_category])[0]
+encoded_menu_item = label_encoder.fit_transform([menu_item])[0]
+encoded_ingredients = label_encoder.fit_transform([ingredients])[0]
 
 input_data = np.array([[encoded_menu_category, encoded_menu_item, encoded_ingredients, price]])
 
