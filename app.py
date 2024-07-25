@@ -1,54 +1,57 @@
 import streamlit as st
+import pandas as pd
 import numpy as np
 import pickle
 
-# Load model and label encoders
+# Load model and encoders
 def load_model():
     with open('random_forest_model.pkl', 'rb') as file:
         model = pickle.load(file)
     return model
 
-def load_label_encoders():
+def load_encoders():
     with open('label_encoders.pkl', 'rb') as file:
-        label_encoders = pickle.load(file)
-    return label_encoders
+        encoders = pickle.load(file)
+    return encoders
 
 model = load_model()
-label_encoders = load_label_encoders()
+label_encoder_category, label_encoder_item, label_encoder_ingredients, _ = load_encoders()
 
 # Title
 st.title("Aplikasi Prediksi Profitabilitas Restoran")
 
 # Input form
 st.header("Input Data")
-
-# Display dropdowns for Menu Category, Menu Item, and Ingredients
-menu_category = st.selectbox("Menu Category", label_encoders['menu_category'].classes_)
-menu_item = st.selectbox("Menu Item", label_encoders['menu_item'].classes_)
-ingredients = st.selectbox("Ingredients", label_encoders['ingredients'].classes_)
+menu_category = st.selectbox("Menu Category", ["Beverages", "Appetizers", "Desserts", "Main Course"])
+menu_item = st.text_input("Menu Item")
+ingredients = st.text_input("Ingredients")
 price = st.number_input("Price", min_value=0.0, value=10.0)
 
-# Preprocessing input
-def encode_input(value, encoder, encoder_name):
-    if value in encoder.classes_:
-        return encoder.transform([value])[0]
-    else:
-        st.warning(f"{encoder_name} '{value}' tidak dikenal. Gunakan nilai yang valid.")
-        return None
+# Preprocessing input with validation
+try:
+    encoded_menu_category = label_encoder_category.transform([menu_category])[0]
+except ValueError:
+    st.error("Menu Category tidak dikenali.")
+    encoded_menu_category = None
 
-encoded_menu_category = encode_input(menu_category, label_encoders['menu_category'], 'Menu Category')
-encoded_menu_item = encode_input(menu_item, label_encoders['menu_item'], 'Menu Item')
-encoded_ingredients = encode_input(ingredients, label_encoders['ingredients'], 'Ingredients')
+try:
+    encoded_menu_item = label_encoder_item.transform([menu_item])[0]
+except ValueError:
+    st.error("Menu Item tidak dikenali.")
+    encoded_menu_item = None
 
-if None not in [encoded_menu_category, encoded_menu_item, encoded_ingredients]:
+try:
+    encoded_ingredients = label_encoder_ingredients.transform([ingredients])[0]
+except ValueError:
+    st.error("Ingredients tidak dikenali.")
+    encoded_ingredients = None
+
+if encoded_menu_category is not None and encoded_menu_item is not None and encoded_ingredients is not None:
     input_data = np.array([[encoded_menu_category, encoded_menu_item, encoded_ingredients, price]])
 
     # Prediction
     if st.button("Prediksi"):
-        try:
-            prediction = model.predict(input_data)
-            st.write(f"Hasil Prediksi: {'High' if prediction[0] == 1 else 'Low'}")
-        except Exception as e:
-            st.error(f"Terjadi kesalahan saat melakukan prediksi: {e}")
+        prediction = model.predict(input_data)
+        st.write(f"Hasil Prediksi: {'High' if prediction[0] == 1 else 'Low'}")
 else:
-    st.write("Mohon periksa input Anda dan coba lagi.")
+    st.warning("Mohon isi semua input dengan benar.")
